@@ -42,7 +42,7 @@ def jl_fit_transform(X, objective_dim, method="basic"):
         The dataset after the JL projection.
 
     jl_transformer : object
-        Transformer instance.
+        Projection Matrix 
     """
     if method.lower() == "basic":
         jl_transformer = (1 / math.sqrt(objective_dim)) \
