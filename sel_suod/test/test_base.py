@@ -11,14 +11,14 @@ import numpy as np
 # is installed, no need to use the following line
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from suod.models.base import SUOD
+from sel_suod.models.base import sel_SUOD
 
 from pyod.utils.data import generate_data
 from pyod.models.lof import LOF
 from pyod.models.pca import PCA
 from pyod.models.hbos import HBOS
 from pyod.models.lscp import LSCP
-from suod.models.cost_predictor import build_cost_predictor
+from sel_suod.models.cost_predictor import build_cost_predictor
 import joblib
 
 
@@ -47,7 +47,7 @@ class TestBASE(unittest.TestCase):
 				random_state=self.random_state)
 		]
 
-		self.model = SUOD(base_estimators=self.base_estimators, n_jobs=2,
+		self.model = sel_SUOD(base_estimators=self.base_estimators, n_jobs=2,
 						  rp_flag_global=True, bps_flag=True,
 						  contamination=self.contamination,
 						  approx_flag_global=True,

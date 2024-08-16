@@ -26,15 +26,15 @@ from pyod.models.sklearn_base import _pprint
 from pyod.utils.utility import check_parameter
 
 from sklearn.base import clone
-from suod.models.cost_predictor import build_cost_predictor
-from suod.models.parallel_processes import cost_forecast_meta
-from suod.models.parallel_processes import balanced_scheduling
-from suod.models.parallel_processes import _parallel_fit
-from suod.models.parallel_processes import _parallel_predict
-from suod.models.parallel_processes import _parallel_predict_proba
-from suod.models.parallel_processes import _parallel_decision_function
-from suod.models.parallel_processes import _partition_estimators
-from suod.models.parallel_processes import _parallel_approx_estimators
+from sel_suod.models.cost_predictor import build_cost_predictor
+from sel_suod.models.parallel_processes import cost_forecast_meta
+from sel_suod.models.parallel_processes import balanced_scheduling
+from sel_suod.models.parallel_processes import _parallel_fit
+from sel_suod.models.parallel_processes import _parallel_predict
+from sel_suod.models.parallel_processes import _parallel_predict_proba
+from sel_suod.models.parallel_processes import _parallel_decision_function
+from sel_suod.models.parallel_processes import _partition_estimators
+from sel_suod.models.parallel_processes import _parallel_approx_estimators
 from ..utils.utility import _unfold_parallel, build_codes
 
 import warnings
@@ -48,7 +48,7 @@ from inspect import signature
 
 
 # noinspection PyPep8
-class SUOD(object):
+class sel_SUOD(object):
 	"""SUOD (Scalable Unsupervised Outlier Detection) is an acceleration
 	framework for large scale unsupervised outlier detector training and
 	prediction. The corresponding paper is under review in KDD 2020.

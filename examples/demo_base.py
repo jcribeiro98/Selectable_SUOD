@@ -23,8 +23,8 @@ warnings.filterwarnings("ignore")
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname("__file__"), '..')))
 
-from suod.models.base import SUOD
-from suod.utils.utility import get_estimators_small
+from sel_suod.models.base import sel_SUOD
+from sel_suod.utils.utility import get_estimators_small
 
 if __name__ == "__main__":
     # load files
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     subspaces = np.array([subspaces, subspaces])
     subspaces[1][4] = False
 
-    model = SUOD(base_estimators=base_estimators, subspaces=subspaces,
+    model = sel_SUOD(base_estimators=base_estimators, subspaces=subspaces,
                  n_jobs=6, bps_flag=True,
                  contamination=contamination, approx_flag_global=True)
 

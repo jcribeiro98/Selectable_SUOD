@@ -10,7 +10,7 @@ from numpy.testing import assert_equal
 # if suod is installed, no need to use the following line
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from suod.utils.utility import raw_score_to_proba
+from sel_suod.utils.utility import raw_score_to_proba
 
 
 class TestUtility(unittest.TestCase):

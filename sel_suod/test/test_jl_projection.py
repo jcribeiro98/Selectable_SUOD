@@ -10,7 +10,7 @@ from numpy.testing import assert_equal
 # if suod is installed, no need to use the following line
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from suod.models.jl_projection import jl_fit_transform, jl_transform
+from sel_suod.models.jl_projection import jl_fit_transform, jl_transform
 
 
 class TestCostPredictor(unittest.TestCase):

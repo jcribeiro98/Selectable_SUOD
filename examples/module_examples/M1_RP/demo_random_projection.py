@@ -29,7 +29,7 @@ from pyod.utils.utility import precision_n_scores
 from pyod.utils.utility import generate_bagging_indices
 from sklearn.metrics import roc_auc_score
 
-from suod.models.jl_projection import jl_fit_transform
+from sel_suod.models.jl_projection import jl_fit_transform
 
 import warnings
 
