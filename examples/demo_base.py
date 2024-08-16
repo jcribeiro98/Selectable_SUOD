@@ -6,6 +6,7 @@ import scipy as sp
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
+import numpy as np
 from pyod.models.iforest import IForest
 from pyod.models.lof import LOF
 from pyod.utils.data import evaluate_print
@@ -49,9 +50,16 @@ if __name__ == "__main__":
         train_test_split(X, y, test_size=0.4, random_state=42)
 
     contamination = y.sum() / len(y)
-    base_estimators = get_estimators_small(contamination)
+    base_estimators = [LOF()]
 
-    model = SUOD(base_estimators=base_estimators, n_jobs=6, bps_flag=True,
+    #Creating exemplary subspaces
+    subspaces = [True]*20
+    subspaces.append(False)
+    subspaces = np.array([subspaces, subspaces])
+    subspaces[1][4] = False
+
+    model = SUOD(base_estimators=base_estimators, subspaces=subspaces,
+                 n_jobs=6, bps_flag=True,
                  contamination=contamination, approx_flag_global=True)
 
     model.fit(X_train)  # fit all models with X
