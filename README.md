@@ -1,10 +1,9 @@
-FORK OF THE PACKAGE -->
-===========================================================================
-SUOD: Accelerating Large-scare Unsupervised Heterogeneous Outlier Detection
+
+*Fork of*: SUOD: Accelerating Large-scare Unsupervised Heterogeneous Outlier Detection
 ===========================================================================
 
 
-Please refer to the original package for more information about the base functionalities: [suod](https://github.com/yzhao062/SUOD).
+Please refer to the [original package](https://github.com/yzhao062/SUOD) for more information about the base functionalities.
 This fork forces SUOD to use pre-selected axis-parallel subspaces, such as those obtained after Feature Bagging or Feature Selection. These subspaces must be declared as a `np.array`, and can take any structure such that the operation `X[:, subspace]` yields the desired projected dataset. 
 It uses the same class declaration as base SUOD, only adding a new variable: `subspaces`, and changing the class name to sel_SUOD.
 This fork additionally contains a number of QOL additions, like:
@@ -14,7 +13,8 @@ This fork additionally contains a number of QOL additions, like:
    - It will, by default, not run approximation on any method unless the global flag for approximation is manually turned to true.
 
 There should be no conflict between SUOD and sel_SUOD.
-Take a look at the following code for an practical example: 
+Take a look at the following code for a practical example: 
+
 ```
 base_estimators = [LOF()] #The class sel_SUOD automatically initizializes itself with subspaces.shape[0] clones of this array if len < 2.
 
