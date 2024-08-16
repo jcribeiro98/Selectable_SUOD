@@ -87,8 +87,6 @@ def build_codes(base_estimators, clf_list, ng_clf_list, flag_global):
     base_estimator_names = []
     flags = np.zeros([n_estimators, 1], dtype=int)
     if not flag_global:
-        # revert back
-        flags = np.zeros([n_estimators, 1], dtype=int)
         return flags, base_estimator_names
     else:
         for i in range(n_estimators):

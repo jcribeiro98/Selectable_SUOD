@@ -10,7 +10,8 @@ from sklearn.utils.validation import check_is_fitted
 
 from pyod.utils.utility import score_to_label
 
-from .jl_projection import jl_fit_transform, jl_transform
+from .jl_projection import jl_fit_transform
+from .sub_projection import sub_transform
 from ..utils.utility import raw_score_to_proba
 
 
@@ -158,46 +159,45 @@ def cost_forecast_meta(clf, X, base_estimator_names):
     return time_cost_pred
 
 
-def _parallel_fit(n_estimators, clfs, X, total_n_estimators,
-                  rp_flags, objective_dim, rp_method, verbose):
+def _parallel_fit(n_estimators, clfs, X, total_n_estimators, subspaces,
+                  rp_flags, verbose):
+    '''
+    Main way of fitting an method in all subspaces at the same time
+    '''
     X = check_array(X)
     # Build estimators
     estimators = []
-    rp_transformers = []
-    for i in range(n_estimators):
+    for i, subspace in enumerate(subspaces):
         estimator = clone(clfs[i])
         if verbose > 1:
             print("Building estimator %d of %d for this parallel run "
                   "(total %d)..." % (i + 1, n_estimators, total_n_estimators))
 
         if rp_flags[i] == 1:
-            X_scaled, jlt_transformer = jl_fit_transform(X, objective_dim,
-                                                         rp_method)
-            rp_transformers.append(jlt_transformer)
+            X_scaled = sub_transform(X, subspace) #Here the projection into the subspace happen.
+            
 
             estimator.fit(X_scaled)
             estimators.append(estimator)
         else:
-            # if projection is not used, use an identity matrix to keep the shape
-            rp_transformers.append(np.ones([X.shape[1], X.shape[1]]))
             estimator.fit(X)
             estimators.append(estimator)
-    return estimators, rp_transformers
+    return estimators
 
 
-def _parallel_predict(n_estimators, clfs, approximators, X, total_n_estimators,
-                      rp_transformers, approx_flags, contamination, verbose):
+def _parallel_predict(n_estimators, clfs, approximators, X, subspaces, total_n_estimators,
+                      approx_flags, contamination, verbose):
     X = check_array(X)
 
     pred = []
-    for i in range(n_estimators):
+    for i, subspace in enumerate(subspaces):
         estimator = clfs[i]
         if verbose > 1:
             print("predicting with estimator %d of %d for this parallel run "
                   "(total %d)..." % (i + 1, n_estimators, total_n_estimators))
 
         # project matrix
-        X_scaled = jl_transform(X, rp_transformers[i])
+        X_scaled = sub_transform(X, subspace)
 
         # turn approximator scores to labels by outlier
         if approx_flags[i] == 1:
@@ -214,19 +214,19 @@ def _parallel_predict(n_estimators, clfs, approximators, X, total_n_estimators,
 
 
 def _parallel_decision_function(n_estimators, clfs, approximators, X,
-                                total_n_estimators, rp_transformers,
+                                total_n_estimators, subspaces,
                                 approx_flags, verbose):
     X = check_array(X)
 
     pred = []
-    for i in range(n_estimators):
+    for i, subspace in enumerate(subspaces):
         estimator = clfs[i]
         if verbose > 1:
             print("predicting with estimator %d of %d for this parallel run "
                   "(total %d)..." % (i + 1, n_estimators, total_n_estimators))
 
         # project matrix
-        X_scaled = jl_transform(X, rp_transformers[i])
+        X_scaled = sub_transform(X, subspace)
 
         # turn approximator scores to labels by outlier
         if approx_flags[i] == 1:
@@ -240,19 +240,19 @@ def _parallel_decision_function(n_estimators, clfs, approximators, X,
 
 
 def _parallel_predict_proba(n_estimators, clfs, approximators, X,
-                            total_n_estimators, rp_transformers,
+                            total_n_estimators, subspaces,
                             approx_flags, verbose):
     X = check_array(X)
 
     pred = []
-    for i in range(n_estimators):
+    for i, subspace in enumerate(subspaces):
         estimator = clfs[i]
         if verbose > 1:
             print("predicting with estimator %d of %d for this parallel run "
                   "(total %d)..." % (i + 1, n_estimators, total_n_estimators))
 
         # project matrix
-        X_scaled = jl_transform(X, rp_transformers[i])
+        X_scaled = sub_transform(X, subspace)
 
         # turn approximator scores to labels by outlier
         if approx_flags[i] == 1:
@@ -270,7 +270,7 @@ def _parallel_predict_proba(n_estimators, clfs, approximators, X,
 
 
 def _parallel_approx_estimators(n_estimators, clfs, X, total_n_estimators,
-                                approx_flags, approximator, rp_transformers,
+                                approx_flags, approximator, subspaces,
                                 verbose):
     """
     Parameters
@@ -292,9 +292,9 @@ def _parallel_approx_estimators(n_estimators, clfs, X, total_n_estimators,
     approximators = []
 
     # TODO: approximators can be different
-    for i in range(n_estimators):
+    for i, subspace in enumerate(subspaces):
         # project matrix
-        X_scaled = jl_transform(X, rp_transformers[i])
+        X_scaled = sub_transform(X, subspace)
 
         estimator = clfs[i]
 

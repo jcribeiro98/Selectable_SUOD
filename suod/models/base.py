@@ -25,6 +25,7 @@ set_start_method('spawn')
 from pyod.models.sklearn_base import _pprint
 from pyod.utils.utility import check_parameter
 
+from sklearn.base import clone
 from suod.models.cost_predictor import build_cost_predictor
 from suod.models.parallel_processes import cost_forecast_meta
 from suod.models.parallel_processes import balanced_scheduling
@@ -79,8 +80,6 @@ class SUOD(object):
 	rp_flag_global : bool, optional (default=True)
 		If set to False, random projection is turned off for all base models.
 
-	target_dim_frac : float in (0., 1), optional (default=0.5)
-		The target compression ratio.
 
 	jl_method : string, optional (default = 'basic')
 		The JL projection method:
@@ -118,21 +117,22 @@ class SUOD(object):
 		Controls the verbosity of the building process.
 	"""
 
-	def __init__(self, base_estimators, contamination=0.1, n_jobs=None,
+	def __init__(self, base_estimators:list, subspaces:np.array, contamination=0.1, n_jobs=None,
 				 rp_clf_list=None, rp_ng_clf_list=None, rp_flag_global=True,
-				 target_dim_frac=0.5, jl_method='basic', bps_flag=True,
-				 approx_clf_list=None, approx_ng_clf_list=None,
-				 approx_flag_global=True, approx_clf=None,
+				 bps_flag=True, approx_clf_list=None, approx_ng_clf_list=None,
+				 approx_flag_global=False, approx_clf=None,
 				 verbose=False):
 
 		assert (isinstance(base_estimators, (list)))
 		if len(base_estimators) < 2:
-			raise ValueError('At least 2 estimators are required')
+			base_estimator = base_estimators
+			base_estimators = [clone(base_estimator[0]) for i in range(subspaces.shape[0])]
 		self.base_estimators = base_estimators
+		self.subspaces = subspaces
+		if len(base_estimators) != subspaces.shape[0] :
+			raise ValueError("Number of methods and subspaces does not coincide. There should be one method for each selected subspace")
 		self.n_estimators = len(base_estimators)
-		self.rp_flag_global = rp_flag_global
-		self.target_dim_frac = target_dim_frac
-		self.jl_method = jl_method
+		self.rp_flag_global = rp_flag_global 
 		self.bps_flag = bps_flag
 		self.verbose = verbose
 		self.approx_flag_global = approx_flag_global
@@ -157,7 +157,7 @@ class SUOD(object):
 		self : object
 			Post-check estimator.
 		"""
-
+		
 		if not (0. < contamination <= 0.5):
 			raise ValueError("contamination must be in (0, 0.5], "
 							 "got: %f" % contamination)
@@ -189,11 +189,6 @@ class SUOD(object):
 		else:
 			self.rp_ng_clf_list = rp_ng_clf_list
 
-		# Validate target_dim_frac
-		check_parameter(self.target_dim_frac, low=0, high=1,
-						include_left=False,
-						include_right=True, param_name='target_dim_frac')
-
 		# validate model approximation list
 		if approx_clf_list is None:
 			# the algorithms that should be be using approximation
@@ -224,15 +219,6 @@ class SUOD(object):
 		X = check_array(X)
 		n_samples, n_features = X.shape[0], X.shape[1]
 
-		# Validate target_dim_frac for random projection
-		if isinstance(self.target_dim_frac, (numbers.Integral, np.integer)):
-			self.target_dim_frac_ = self.target_dim_frac
-		else:  # float
-			self.target_dim_frac_ = int(self.target_dim_frac * n_features)
-
-		# it should have at least 1 dimension
-		if self.target_dim_frac_ < 1:
-			self.target_dim_frac_ = 1
 
 		# build flags for random projection
 		self.rp_flags_, _ = build_codes(self.base_estimators, self.rp_clf_list,
@@ -282,9 +268,8 @@ class SUOD(object):
 				self.base_estimators[starts[i]:starts[i + 1]],
 				X,
 				self.n_estimators,
+				self.subspaces[starts[i]:starts[i + 1]],
 				self.rp_flags[starts[i]:starts[i + 1]],
-				self.target_dim_frac_,
-				self.jl_method,
 				verbose=self.verbose)
 			for i in range(n_jobs))
 
@@ -296,8 +281,7 @@ class SUOD(object):
 		all_results = list(map(list, zip(*all_results)))
 
 		# overwrite estimators
-		self.base_estimators = _unfold_parallel(all_results[0], n_jobs)
-		self.jl_transformers_ = _unfold_parallel(all_results[1], n_jobs)
+		self.base_estimators = all_results[0]
 
 		return self
 
@@ -337,7 +321,7 @@ class SUOD(object):
 				self.n_estimators,
 				self.approx_flags[starts[i]:starts[i + 1]],
 				self.approx_clf,
-				self.jl_transformers_[starts[i]:starts[i + 1]],
+				self.subspaces[starts[i]:starts[i + 1]],
 				verbose=True)
 			for i in range(n_jobs))
 
@@ -403,9 +387,9 @@ class SUOD(object):
 				self.base_estimators[starts[i]:starts[i + 1]],
 				self.approximators[starts[i]:starts[i + 1]],
 				X,
+				self.subspaces[starts[i]:starts[i + 1]],
 				self.n_estimators,
 				# self.rp_flags[starts[i]:starts[i + 1]],
-				self.jl_transformers_[starts[i]:starts[i + 1]],
 				self.approx_flags[starts[i]:starts[i + 1]],
 				self.contamination,
 				verbose=True)
@@ -485,7 +469,7 @@ class SUOD(object):
 				X,
 				self.n_estimators,
 				# self.rp_flags[starts[i]:starts[i + 1]],
-				self.jl_transformers_[starts[i]:starts[i + 1]],
+				self.subspaces[starts[i]:starts[i + 1]],
 				self.approx_flags[starts[i]:starts[i + 1]],
 				verbose=True)
 			for i in range(n_jobs))
@@ -568,7 +552,7 @@ class SUOD(object):
 				X,
 				self.n_estimators,
 				# self.rp_flags[starts[i]:starts[i + 1]],
-				self.jl_transformers_[starts[i]:starts[i + 1]],
+				self.subspaces[starts[i]:starts[i + 1]],
 				self.approx_flags[starts[i]:starts[i + 1]],
 				verbose=True)
 			for i in range(n_jobs))
