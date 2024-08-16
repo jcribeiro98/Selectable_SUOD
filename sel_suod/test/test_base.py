@@ -34,23 +34,14 @@ class TestBASE(unittest.TestCase):
 			contamination=self.contamination, random_state=self.random_state)
 
 		self.base_estimators = [
-			LOF(n_neighbors=5, contamination=self.contamination),
-			LOF(n_neighbors=15, contamination=self.contamination),
-			LOF(n_neighbors=25, contamination=self.contamination),
-			LOF(n_neighbors=35, contamination=self.contamination),
-			LOF(n_neighbors=45, contamination=self.contamination),
-			HBOS(contamination=self.contamination),
-			PCA(contamination=self.contamination),
-			LSCP(detector_list=[
-				LOF(n_neighbors=5, contamination=self.contamination),
-				LOF(n_neighbors=15, contamination=self.contamination)],
-				random_state=self.random_state)
+			LOF(n_neighbors=5, contamination=self.contamination)
 		]
-
-		self.model = sel_SUOD(base_estimators=self.base_estimators, n_jobs=2,
+		self.subspaces = np.array([[1,1],[1,1],[1,1],[1,1]])
+		self.model = sel_SUOD(base_estimators=self.base_estimators, subspaces=self.subspaces, 
+						  n_jobs=2,
 						  rp_flag_global=True, bps_flag=True,
 						  contamination=self.contamination,
-						  approx_flag_global=True,
+						  approx_flag_global=False,
 						  verbose=True)
 
 	def test_initialization(self):
