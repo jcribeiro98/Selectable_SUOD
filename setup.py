@@ -5,7 +5,7 @@ from os import path
 from io import open  # for Python 2 and 3 compatibility
 
 # get __version__ from _version.py
-ver_file = path.join('suod', 'version.py')
+ver_file = path.join('sel_suod', 'version.py')
 with open(ver_file) as f:
     exec(f.read())
 
@@ -14,7 +14,7 @@ this_directory = path.abspath(path.dirname(__file__))
 
 # read the contents of README.rst
 def readme():
-    with open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
+    with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
         return f.read()
 
 
@@ -24,15 +24,15 @@ with open(path.join(this_directory, 'requirements.txt'),
     requirements = f.read().splitlines()
 
 setup(
-    name='suod',
+    name='sel_suod',
     version=__version__,
-    description='A Scalable Framework for Unsupervised Outlier Detection (Anomaly Detection)',
+    description='Fork from SUOD v0.1.3 (by Yue Zhao)',
     long_description=readme(),
     long_description_content_type='text/x-rst',
-    author='Yue Zhao',
-    author_email='yzhao062@gmail.com',
-    url='https://github.com/yzhao062/suod',
-    download_url='https://github.com/yzhao062/suod/archive/master.zip',
+    author='Jose Cribeiro',
+    author_email='jose@cribeiro.de',
+    url='https://github.com/jcribeiro98/Selectable_SUOD',
+    download_url='https://github.com/jcribeiro98/Selectable_SUOD/archive/refs/heads/master.zip',
     keywords=['ensemble learning', 'anomaly detection', 'outlier ensembles',
               'data mining', 'machine learning', 'python'],
     packages=find_packages(exclude=['test']),
