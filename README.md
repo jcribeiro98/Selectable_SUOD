@@ -2,6 +2,13 @@
 *Fork of*: SUOD: Accelerating Large-scare Unsupervised Heterogeneous Outlier Detection
 ===========================================================================
 
+---
+### *NEW*: Now available in PyPi! 
+
+```
+pip install sel-suod
+```
+---
 
 Please refer to the [original package](https://github.com/yzhao062/SUOD) for more information about the base functionalities.
 This fork forces SUOD to use pre-selected axis-parallel subspaces, such as those obtained after Feature Bagging or Feature Selection. These subspaces must be declared as a `np.array`, and can take any structure such that the operation `X[:, subspace]` yields the desired projected dataset. 
