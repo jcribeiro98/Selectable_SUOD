@@ -24,7 +24,7 @@ https://pypi.org/project/suod/
 5. make sure the test run locally (roc floor)
 6. make sure the example look consistent
 7. add algorithm to suod.model.rst
-8. add algorithm to index.rst and README.rst
+8. add algorithm to index.rst and README.md
 9. add to benchmark.py and compare_all_models.py; when applicable, change notebooks as well
 
 conda activate myenv

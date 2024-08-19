@@ -28,7 +28,7 @@ setup(
     version=__version__,
     description='Fork from SUOD v0.1.3 (by Yue Zhao)',
     long_description=readme(),
-    long_description_content_type='text/x-rst',
+    long_description_content_type='text/markdown',
     author='Jose Cribeiro',
     author_email='jose@cribeiro.de',
     url='https://github.com/jcribeiro98/Selectable_SUOD',
