@@ -146,6 +146,7 @@ class sel_SUOD(object):
 		self.rp_flags, self.base_estimator_names = build_codes(
 			self.base_estimators, self.rp_clf_list, self.rp_ng_clf_list,
 			self.rp_flag_global)
+		self.rp_flags = np.array([[1]]*self.base_estimator_names.__len__())
 
 	def _parameter_validation(self, contamination, n_jobs, rp_clf_list,
 							  rp_ng_clf_list, approx_clf_list,
@@ -202,6 +203,15 @@ class sel_SUOD(object):
 									   'LMDD', 'LSCP', 'IForest']
 		else:
 			self.approx_ng_clf_list = approx_ng_clf_list
+
+		if self.approx_flag_global == False:
+			self.approximators = [None]*self.subspaces.shape[0]
+			self.approx_flags, _ = build_codes(self.base_estimators,
+										   self.approx_clf_list,
+										   self.approx_ng_clf_list,
+										   self.approx_flag_global)
+
+
 
 	def fit(self, X):
 		"""Fit all base estimators.
@@ -278,10 +288,8 @@ class sel_SUOD(object):
 
 		# reformat and unfold the lists. Save the trained estimators and
 		# transformers
-		all_results = list(map(list, zip(*all_results)))
-
 		# overwrite estimators
-		self.base_estimators = all_results[0]
+		self.base_estimators = _unfold_parallel(all_results, n_jobs)
 
 		return self
 

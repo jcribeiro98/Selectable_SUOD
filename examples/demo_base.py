@@ -1,3 +1,5 @@
+from sel_suod.utils.utility import get_estimators_small
+from sel_suod.models.base import sel_SUOD
 import os
 import sys
 
@@ -23,8 +25,6 @@ warnings.filterwarnings("ignore")
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname("__file__"), '..')))
 
-from sel_suod.models.base import sel_SUOD
-from sel_suod.utils.utility import get_estimators_small
 
 if __name__ == "__main__":
     # load files
@@ -52,18 +52,17 @@ if __name__ == "__main__":
     contamination = y.sum() / len(y)
     base_estimators = [LOF()]
 
-    #Creating exemplary subspaces
+    # Creating exemplary subspaces
     subspaces = [True]*20
     subspaces.append(False)
     subspaces = np.array([subspaces, subspaces])
     subspaces[1][4] = False
 
     model = sel_SUOD(base_estimators=base_estimators, subspaces=subspaces,
-                 n_jobs=6, bps_flag=True,
-                 contamination=contamination, approx_flag_global=True)
+                     n_jobs=6, bps_flag=False,
+                     contamination=contamination, approx_flag_global=False)
 
     model.fit(X_train)  # fit all models with X
-    model.approximate(X_train)  # conduct model approximation if it is enabled
     predicted_labels = model.predict(X_test)  # predict labels
     predicted_scores = model.decision_function(X_test)  # predict scores
     predicted_probs = model.predict_proba(X_test)  # predict scores
