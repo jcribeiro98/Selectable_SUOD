@@ -18,6 +18,7 @@ from sklearn.utils import check_array
 import joblib
 from joblib import Parallel, delayed, effective_n_jobs
 from joblib.externals.loky.backend.context import set_start_method
+from joblib.externals.loky import get_reusable_executor
 
 set_start_method('spawn')
 # need to do this to fix issue on Python 3.7
@@ -272,7 +273,7 @@ class sel_SUOD(object):
 		# https://github.com/joblib/joblib/issues/806
 		# a fix is on the way: https://github.com/joblib/joblib/pull/966
 		# max_nbytes can be dropped on other OS
-		all_results = Parallel(n_jobs=n_jobs, verbose=True)(
+		all_results = Parallel(n_jobs=n_jobs, verbose=True, prefer="threads")(
 			delayed(_parallel_fit)(
 				n_estimators_list[i],
 				self.base_estimators[starts[i]:starts[i + 1]],
@@ -288,9 +289,9 @@ class sel_SUOD(object):
 
 		# reformat and unfold the lists. Save the trained estimators and
 		# transformers
+
 		# overwrite estimators
 		self.base_estimators = _unfold_parallel(all_results, n_jobs)
-
 		return self
 
 	def approximate(self, X):
@@ -336,6 +337,7 @@ class sel_SUOD(object):
 		# print('Balanced Scheduling Total Test Time:', time.time() - start)
 
 		self.approximators = _unfold_parallel(all_approx_results, n_jobs)
+		get_reusable_executor(kill_workers=True)
 		return self
 
 	def predict(self, X):
@@ -469,7 +471,7 @@ class sel_SUOD(object):
 			start = time.time()
 
 		all_results_scores = Parallel(n_jobs=n_jobs,
-									  verbose=True)(
+									  verbose=True, prefer="threads")(
 			delayed(_parallel_decision_function)(
 				n_estimators_list[i],
 				self.base_estimators[starts[i]:starts[i + 1]],
@@ -481,7 +483,7 @@ class sel_SUOD(object):
 				self.approx_flags[starts[i]:starts[i + 1]],
 				verbose=True)
 			for i in range(n_jobs))
-
+		get_reusable_executor().shutdown(wait=True)
 		# fit the base models
 		if self.verbose:
 			print('Parallel Score Prediction without Approximators '
