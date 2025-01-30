@@ -30,7 +30,7 @@ setup(
     long_description=readme(),
     long_description_content_type='text/markdown',
     author='Jose Cribeiro',
-    author_email='jose@cribeiro.de',
+    author_email='jose@cribeiro.net',
     url='https://github.com/jcribeiro98/Selectable_SUOD',
     download_url='https://github.com/jcribeiro98/Selectable_SUOD/archive/refs/heads/master.zip',
     keywords=['ensemble learning', 'anomaly detection', 'outlier ensembles',
